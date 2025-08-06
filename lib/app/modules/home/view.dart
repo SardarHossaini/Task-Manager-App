@@ -5,6 +5,7 @@ import 'package:task_manager_app/app/core/utils/extensions.dart';
 import 'package:task_manager_app/app/data/models/task.dart';
 import 'package:task_manager_app/app/modules/home/controller.dart';
 import 'package:task_manager_app/app/modules/home/widgets/add_card.dart';
+import 'package:task_manager_app/app/modules/home/widgets/add_dialog.dart';
 import 'package:task_manager_app/app/modules/home/widgets/tast_card.dart';
 
 class HomePage extends GetView<HomeController> {
@@ -71,7 +72,8 @@ class HomePage extends GetView<HomeController> {
         builder: (_, __, ___) {
           return Obx(
             () => FloatingActionButton(
-              onPressed: () {},
+              onPressed: () =>
+                  Get.to(() => AddDialog(), transition: Transition.downToUp),
               child: Icon(
                 controller.deleting.value ? Icons.delete : Icons.add,
                 size: 30,
@@ -87,10 +89,10 @@ class HomePage extends GetView<HomeController> {
             ),
           );
         },
-      onAccept: (Task task){
-        controller.deleteTask(task);
-        EasyLoading.showSuccess("Task deleted successfully");
-      } ,
+        onAccept: (Task task) {
+          controller.deleteTask(task);
+          EasyLoading.showSuccess("Task deleted successfully");
+        },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
