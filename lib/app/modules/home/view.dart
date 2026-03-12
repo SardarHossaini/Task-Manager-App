@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:task_manager_app/app/core/utils/extensions.dart';
 import 'package:task_manager_app/app/modules/home/controller.dart';
 import 'package:task_manager_app/app/modules/home/widgets/add_card.dart';
+import 'package:task_manager_app/app/modules/home/widgets/add_dialog.dart';
 import 'package:task_manager_app/app/modules/home/widgets/tast_card.dart';
 
 class HomePage extends GetView<HomeController> {
@@ -38,7 +40,25 @@ class HomePage extends GetView<HomeController> {
                   //   ),
                   // ),
                   ...controller.tasks
-                      .map((task) => TaskCard(task: task))
+                      .map(
+                        (task) => LongPressDraggable(
+                          data: task,
+                          onDragStarted: () {
+                            controller.changeDeleting(true);
+                          },
+                          onDraggableCanceled: (_, __) {
+                            controller.changeDeleting(false);
+                          },
+                          onDragEnd: (_) {
+                            controller.changeDeleting(false);
+                          },
+                          feedback: Opacity(
+                            opacity: 0.8,
+                            child: TaskCard(task: task),
+                          ),
+                          child: TaskCard(task: task),
+                        ),
+                      )
                       .toList(),
                   AddCard(),
                 ],
@@ -47,6 +67,33 @@ class HomePage extends GetView<HomeController> {
           ],
         ),
       ),
+      floatingActionButton: DragTarget<Task>(
+        builder: (_, __, ___) {
+          return Obx(
+            () => FloatingActionButton(
+              onPressed: () =>
+                  Get.to(() => AddDialog(), transition: Transition.downToUp),
+              child: Icon(
+                controller.deleting.value ? Icons.delete : Icons.add,
+                size: 30,
+              ),
+              backgroundColor: controller.deleting.value
+                  ? Colors.red
+                  : Colors.blue,
+              foregroundColor: Colors.white,
+
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50),
+              ),
+            ),
+          );
+        },
+        onAccept: (Task task) {
+          controller.deleteTask(task);
+          EasyLoading.showSuccess("Task deleted successfully");
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
